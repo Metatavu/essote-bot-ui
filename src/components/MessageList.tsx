@@ -308,7 +308,7 @@ class MessageList extends React.Component<Props, State> {
             }
 
             { quickReplies.length > 0 && quickReplies.length >= 4 && !this.state.waitingForBot &&
-              <div style={{background: "#fff", paddingBottom: "30px", position: "fixed", left: "10px", bottom: "79px"}}>
+              <div style={{background: "#fff", paddingBottom: "0", zIndex:99, position: "fixed", left: "10px", bottom: "130px"}}>
                 {quickReplyItemsDropdown}
               </div>
             }
