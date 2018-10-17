@@ -24,11 +24,11 @@ class Bot extends React.Component<Props, any> {
   constructor(props: Props) {
     super(props);
     this.metamindClient = new MetamindClient({
-      apiUrl:  process.env.REACT_APP_API_URL || "http://dev-metamind.com:8080/v1",
-      clientId: process.env.REACT_APP_CLIENT_ID || "iidee",
-      clientSecret: process.env.REACT_APP_CLIENT_SECRET || "siikret",
+      apiUrl:  process.env.REACT_APP_API_URL || "",
+      clientId: process.env.REACT_APP_CLIENT_ID || "",
+      clientSecret: process.env.REACT_APP_CLIENT_SECRET || "",
       locale: "fi",
-      story: process.env.REACT_APP_STORY || "kuumelaake-laskuri",
+      story: process.env.REACT_APP_STORY || "",
       timeZone: "Europe/Helsinki"
     });
   }
