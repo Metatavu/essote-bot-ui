@@ -13,7 +13,8 @@ import {
   Input,
   Container,
   Dropdown,
-  Icon
+  Icon,
+  DropdownProps
 } from "semantic-ui-react";
 
 import 'react-image-lightbox/style.css';
@@ -32,6 +33,7 @@ export interface MessageData {
   id: string,
   isBot: boolean,
   content: string
+  hint: string
 }
 
 export interface State {
@@ -69,7 +71,8 @@ class MessageList extends React.Component<Props, State> {
     messageDatas.push({
       id: "temp-message",
       content: content,
-      isBot: false
+      isBot: false,
+      hint: ""
     });
     this.setState({
       waitingForBot: true,
@@ -81,7 +84,8 @@ class MessageList extends React.Component<Props, State> {
       messageDatas.push({
         id: "temp-response",
         content: "",
-        isBot: true
+        isBot: true,
+        hint: ""
       });
   
       this.setState({
@@ -139,12 +143,14 @@ class MessageList extends React.Component<Props, State> {
       messageDatas.push({
         id: `${message.id}-message`,
         isBot: false,
-        content: message.content || ""
+        content: message.content || "",
+        hint: message.hint || ""
       });
       messageDatas.push({
         id: `${message.id}-response`,
         isBot: true,
-        content: message.response || ""
+        content: message.response || "",
+        hint: message.hint || ""
       });
     });
     this.setState({
@@ -206,9 +212,13 @@ class MessageList extends React.Component<Props, State> {
     });
   }
 
-  onQuickReplyChange = (e:any, value:any) => this.setState({
-    pendingMessage: value.value as string
-  });
+  onQuickReplyChange = (e:any, data: DropdownProps) => {
+    if (!data.value) {
+      return;
+    }
+
+    this.sendQuickReply(data.value as string);
+  }
 
   render() {
 
@@ -224,9 +234,9 @@ class MessageList extends React.Component<Props, State> {
               <div 
                 style={{
                   borderRadius: "10px",
-                  background: "#fff",
+                  background: "#c3e2f6",
                   display: "inline-block", 
-                  border: "1px solid black",
+                  border: "1px solid #c3e2f6",
                   fontSize: "16px", 
                   padding: "18px"
                 }}
@@ -234,9 +244,9 @@ class MessageList extends React.Component<Props, State> {
               /> : <div 
                 style={{
                   borderRadius: "10px",
-                  background: "#fff", 
+                  background: "#c3e2f6", 
                   color: "#000000",
-                  border: "1px solid black",
+                  border: "1px solid #c3e2f6",
                   display: "inline-block", 
                   fontSize: "16px", 
                   padding: "18px"
@@ -257,9 +267,8 @@ class MessageList extends React.Component<Props, State> {
               <div 
                 style={{
                   borderRadius: "10px", 
-                  background: "#fff",
-                  color: "#000000",
-                  border: "1px solid black", 
+                  background: "#0275d8",
+                  border: "1px solid #0275d8", 
                   display: "inline-block", 
                   fontSize: "16px", 
                   padding: "18px"
@@ -278,7 +287,7 @@ class MessageList extends React.Component<Props, State> {
     const quickReplies = latestMessage && latestMessage.quickResponses ? latestMessage.quickResponses : [];
     const quickReplyItems = quickReplies.map((quickReply) => {
       return (
-        <Button disabled={this.state.waitingForBot} style={{marginTop: "5px", background: "#00A5DB", color: "#fff"}} key={quickReply} size="mini" floated="left" compact onClick={() => {this.sendQuickReply(quickReply)}}>{quickReply}</Button>
+        <Button disabled={this.state.waitingForBot} style={{marginTop: "5px", background: "#0275d8", color: "#fff"}} key={quickReply} size="small" floated="left" compact onClick={() => {this.sendQuickReply(quickReply)}}>{quickReply}</Button>
       )
     });
 
@@ -302,27 +311,22 @@ class MessageList extends React.Component<Props, State> {
               </Grid>
             </div>
             { quickReplies.length > 0 && quickReplies.length <= 3 && !this.state.waitingForBot &&
-              <div style={{background: "#fff", paddingBottom: "30px", position: "fixed", left: "10px", bottom: "79px"}}>
+              <div style={{background: "#fff", paddingBottom: "10px", position: "fixed", left: "10px", bottom: "79px"}}>
                 {quickReplyItems}
               </div>
             }
 
             { quickReplies.length > 0 && quickReplies.length >= 4 && !this.state.waitingForBot &&
-              <div style={{background: "#fff", paddingBottom: "0", zIndex:99, position: "fixed", left: "10px", bottom: "130px"}}>
+              <div style={{background: "#fff", paddingBottom: "0", zIndex:99, position: "fixed", left: "10px", bottom: "95px"}}>
                 {quickReplyItemsDropdown}
               </div>
             }
-            <Segment style={{position: "fixed", bottom: "0", left: "0", right: "0"}}>
+            <Segment style={{background: "#c3e2f6", position: "fixed", bottom: "0", left: "0", right: "0"}}>
               <Container>
                 <Grid>
-                  <Grid.Row>
-                  <div style={{ color: "#000000" }}>
-                    { latestMessage && latestMessage.hint }
-                  </div>
-                  </Grid.Row>
                   <Grid.Row verticalAlign="middle" columns="equal">
                     <Grid.Column style={{paddingLeft: "0"}} width={1}>
-                      <Dropdown upward icon={null} trigger={<Icon style={{color: "#000000"}} name="ellipsis vertical" />} >
+                      <Dropdown upward icon={null} trigger={<Icon size="big" style={{color: "#0275d8"}} name="ellipsis vertical" />} >
                         <Dropdown.Menu style={{border: "none"}}>
                           <Dropdown.Item style={{background: "#fff", border: "none"}}>
                             <Button onClick={this.props.onReset} style={{ background: "#00A5DB", color: "#fff" }}>Aloita alusta</Button>
@@ -338,9 +342,12 @@ class MessageList extends React.Component<Props, State> {
                         onKeyPress={this.handleInputKeyPress}
                         onFocus={() => {setTimeout(this.scrollToBottom, 300)}}
                         fluid />
+                        {latestMessage && latestMessage.hint &&
+                          <small>{latestMessage.hint}</small>
+                        }
                     </Grid.Column>
-                    <Grid.Column style={{paddingLeft: "0"}} textAlign="left" mobile={3} computer={2} width={2}>
-                      <Button disabled={this.state.waitingForBot} onClick={this.onSendButtonClick} style={{ background: "#00A5DB", color: "#fff" }} size="huge" icon="send" circular></Button>
+                    <Grid.Column textAlign="left" mobile={3} computer={2} width={2}>
+                      <Button disabled={this.state.waitingForBot} onClick={this.onSendButtonClick} style={{ background: "#0275d8", color: "#fff" }} size="huge" icon="send" circular></Button>
                     </Grid.Column>
                   </Grid.Row>
                 </Grid>
